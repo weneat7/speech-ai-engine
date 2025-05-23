@@ -24,7 +24,7 @@ public class CustomEventRecordRepositoryImpl implements CustomEventRecordReposit
 
     /**
      * to update event status to new status by fetching event records currently in given zone
-     * @param eventStatuses
+     * @param eventStatusList
      * @param eventStatus
      * @return
      */

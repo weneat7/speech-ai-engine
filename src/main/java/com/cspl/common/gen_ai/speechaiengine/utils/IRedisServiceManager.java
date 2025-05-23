@@ -7,7 +7,8 @@ public interface IRedisServiceManager {
     public Object getValue(String key);
     public void set(String key, Object object, long timeout, TimeUnit timeUnit);
     public void set(String key, Object object);
-    public void delete(String keyPattern);
+    public void delete(String key);
+    public void deletePattern(String keyPattern);
     public Set<String> getAllKeys();
     public boolean isKeyPresent(String key);
 }

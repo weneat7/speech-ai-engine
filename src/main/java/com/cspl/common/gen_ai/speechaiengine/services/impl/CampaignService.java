@@ -1,7 +1,7 @@
 package com.cspl.common.gen_ai.speechaiengine.services.impl;
 
-import com.cspl.common.gen_ai.speechaiengine.dto.CampaignMetadata;
 import com.cspl.common.gen_ai.speechaiengine.dto.RuleCreationDTO;
+import com.cspl.common.gen_ai.speechaiengine.dto.metadata.CampaignMetadata;
 import com.cspl.common.gen_ai.speechaiengine.dtos.request.CampaignRequestDto;
 import com.cspl.common.gen_ai.speechaiengine.dtos.response.CampaignResponseDto;
 import com.cspl.common.gen_ai.speechaiengine.exceptions.RestServiceException;
@@ -22,6 +22,8 @@ import com.cspl.common.gen_ai.speechaiengine.services.IRuleService;
 import com.cspl.common.gen_ai.speechaiengine.utils.IRedisServiceManager;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -132,8 +134,13 @@ public class CampaignService implements ICampaignService {
                 throw new RestServiceException("Cannot create campaign pls provide all required fields");
             }
         }
-        campaignRepository.save(updatedCampaign);
+        updateCampaign(campaignId, updatedCampaign);
         return campaignMapper.entityToResponseDto(updatedCampaign);
+    }
+
+    @CachePut(value = "campaign", key = "#campaignId")
+    public Campaign updateCampaign(String campaignId, Campaign campaign){
+        return campaignRepository.save(campaign);
     }
 
     /**
@@ -184,6 +191,7 @@ public class CampaignService implements ICampaignService {
      * @throws Exception
      */
     @Override
+    @Cacheable(value = "campaign", key = "#campaignId")
     public Campaign getCampaign(String campaignId) throws Exception {
         return campaignRepository.findById(campaignId).orElseThrow(() -> new RestServiceException(ErrorCodes.CAMPAIGN_NOT_FOUND.getCode()));
     }

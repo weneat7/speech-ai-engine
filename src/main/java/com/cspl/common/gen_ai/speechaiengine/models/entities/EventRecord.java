@@ -1,6 +1,6 @@
 package com.cspl.common.gen_ai.speechaiengine.models.entities;
 
-import com.cspl.common.gen_ai.speechaiengine.dto.EventRecordMetadata;
+import com.cspl.common.gen_ai.speechaiengine.dto.metadata.EventRecordMetadata;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.DialerType;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.EventStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;

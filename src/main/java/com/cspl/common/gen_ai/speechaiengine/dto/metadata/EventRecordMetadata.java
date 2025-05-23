@@ -1,4 +1,4 @@
-package com.cspl.common.gen_ai.speechaiengine.dto;
+package com.cspl.common.gen_ai.speechaiengine.dto.metadata;
 
 import com.cspl.common.gen_ai.speechaiengine.models.entities.CallRecordLog;
 import lombok.Builder;
@@ -15,4 +15,6 @@ public class EventRecordMetadata {
     @Lazy(value = true)
     @DBRef
     List<CallRecordLog> callRecordLogList;
+
+    private RetryMetadata retryMetadata;
 }

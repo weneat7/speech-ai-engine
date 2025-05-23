@@ -69,9 +69,14 @@ public class RedisServiceManager implements IRedisServiceManager {
      * @param keyPattern the key pattern
      */
     @Override
-    public void delete(String keyPattern) {
+    public void deletePattern(String keyPattern) {
         redisTemplate.keys(keyPattern)
                 .forEach(key -> redisTemplate.delete(key));
+    }
+
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
     }
 
     /**

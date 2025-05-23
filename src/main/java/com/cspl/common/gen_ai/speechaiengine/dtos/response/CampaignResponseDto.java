@@ -1,6 +1,6 @@
 package com.cspl.common.gen_ai.speechaiengine.dtos.response;
 
-import com.cspl.common.gen_ai.speechaiengine.dto.CampaignMetadata;
+import com.cspl.common.gen_ai.speechaiengine.dto.metadata.CampaignMetadata;
 import com.cspl.common.gen_ai.speechaiengine.models.entities.Campaign;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.CampaignStatus;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.CampaignType;

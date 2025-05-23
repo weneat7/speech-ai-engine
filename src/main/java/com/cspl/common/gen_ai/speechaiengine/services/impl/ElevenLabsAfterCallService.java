@@ -37,9 +37,7 @@ public class ElevenLabsAfterCallService implements IAfterCallService {
     }
 
     @Override
-    public void handleCallEndStatus(CallRecordLog callRecordLog, CallStatus callStatus) {   //TODO : Have to fix this bug, we are getting version check error while saving the call record log into db.
-        String callSid = callRecordLog.getCallSid();
-        callRecordLog = callRecordLogRepository.findByCallSid(callSid).orElseThrow(() -> new RuntimeException("No Call Record Found for callSid : " + callSid));
+    public void handleCallEndStatus(CallRecordLog callRecordLog) {
         Map<String,Object> response = restClientHelper.call(elevenLabsConfig.getUrl()+ APIConstants.CONVERSATIONS +"/"+callRecordLog.getConversationId(), Map.of(AppConstants.XI_API_KEY, elevenLabsConfig.getApiKey()));
         List<Map<String,Object>> list = objectMapper.convertValue(response.get(AppConstants.TRANSCRIPT), new TypeReference<List<Map<String, Object>>>() {});
         List<Transcription> transcriptions = new ArrayList<>();
@@ -61,9 +59,7 @@ public class ElevenLabsAfterCallService implements IAfterCallService {
                             .build()
             );
         }
-        callRecordLog.setCallStatus(callStatus);
         callRecordLog.setConversationResult(response);
-//        callRecordLog.setTranscriptions(transcriptions);  TODO : check with Priyanshu, which Transcription to save
-        callRecordLogRepository.save(callRecordLog);
+        callRecordLog.setTranscriptions(transcriptions);
     }
 }

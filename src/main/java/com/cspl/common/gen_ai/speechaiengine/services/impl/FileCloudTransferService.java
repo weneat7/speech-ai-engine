@@ -2,6 +2,7 @@ package com.cspl.common.gen_ai.speechaiengine.services.impl;
 
 import com.cspl.common.gen_ai.speechaiengine.config.AppProperties;
 import com.cspl.common.gen_ai.speechaiengine.services.IFileCloudTransferService;
+import com.cspl.common.gen_ai.speechaiengine.utils.IRedisServiceManager;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -25,6 +26,8 @@ public class FileCloudTransferService implements IFileCloudTransferService {
 
     private final AppProperties.GCPStorageProperties gcpStorageProperties;
 
+    private final IRedisServiceManager redisServiceManager;
+
     @Override
     public String transferFileFromUrl(String fileUrl, String newFileName, String encodedAuth) {
         HttpURLConnection connection = null;
@@ -45,7 +48,8 @@ public class FileCloudTransferService implements IFileCloudTransferService {
             log.debug("Downloading file from URL: {}", fileUrl);
             inputStream =  connection.getInputStream();
 
-            BlobInfo blobInfo = BlobInfo.newBuilder(gcpStorageProperties.getBucketName(), newFileName).build();
+            BlobInfo blobInfo = BlobInfo.newBuilder(gcpStorageProperties.getBucketName(), newFileName)
+                                .setContentType("audio/mpeg").build();
             storage.create(blobInfo, inputStream);
             log.info("File successfully uploaded: {}" , newFileName);
 
@@ -72,11 +76,15 @@ public class FileCloudTransferService implements IFileCloudTransferService {
 
     @Override
     public String getSignedUrl(String fileName,int timeInHours){
+        if(redisServiceManager.isKeyPresent(fileName)) {
+            return redisServiceManager.getValue(fileName).toString();
+        }
         BlobId blobId = BlobId.of(gcpStorageProperties.getBucketName(), fileName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
         long expirationMillis = TimeUnit.HOURS.toMillis(timeInHours);
         String signedUrl = storage.signUrl(blobInfo, expirationMillis, TimeUnit.MILLISECONDS, Storage.SignUrlOption.withV4Signature()).toString();
         log.info("[FileCloudTransferGCSService] generated signed url for {}",fileName);
+        redisServiceManager.set(fileName, signedUrl, timeInHours, TimeUnit.HOURS);
         return signedUrl;
     }
 }

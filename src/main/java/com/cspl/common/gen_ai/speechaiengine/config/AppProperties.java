@@ -67,6 +67,8 @@ public class AppProperties {
         private String recordingUri;
         @NotNull
         private String callDetailUri;
+        @NotNull
+        private String hostUrl;
     }
 
     /**

@@ -2,7 +2,9 @@ package com.cspl.common.gen_ai.speechaiengine.services.impl;
 
 import com.cspl.common.gen_ai.speechaiengine.config.AppProperties;
 import com.cspl.common.gen_ai.speechaiengine.config.RestClientHelper;
+import com.cspl.common.gen_ai.speechaiengine.constants.AppConstants;
 import com.cspl.common.gen_ai.speechaiengine.dto.CallDetailsDto;
+import com.cspl.common.gen_ai.speechaiengine.dto.CallRecordingLogDTO;
 import com.cspl.common.gen_ai.speechaiengine.dto.TwilioInitiateCallDTO;
 import com.cspl.common.gen_ai.speechaiengine.models.entities.CallRecordLog;
 import com.cspl.common.gen_ai.speechaiengine.models.entities.EventRecord;
@@ -45,7 +47,8 @@ public class TwilioCallingService extends AbstractCallingService {
         if(callRecordLog.getCallStatus().equals(CallStatus.COMPLETED)) {
             Map<String, Object> callDetails = restClientHelper.call(twilioConfig.getCallDetailUri() + callSid + ".json", Map.of(HttpHeaders.AUTHORIZATION, twilioConfig.getAuthToken()));
             callRecordLog.setCallDetailsDto(objectMapper.convertValue(callDetails, CallDetailsDto.class));
-            handleCallEndCompleted(callRecordLog);
+            callRecordLog.setRecordingUrl(twilioConfig.getHostUrl()+((Map<String,String>) callDetails.get("subresource_uris")).get("recordings"));
+            handleCallEndCompleted(callRecordLog,twilioConfig.getAuthToken());
         }else {
             callRecordLogRepository.save(callRecordLog);
         }
@@ -69,8 +72,6 @@ public class TwilioCallingService extends AbstractCallingService {
                         .statusCallbackMethod("GET")
                         .statusCallback(twilioConfig.getHangupUrl())
                         .record("true")
-                        .recordingStatusCallbackMethod("GET")
-                        .recordingStatusCallback(twilioConfig.getRecordingUri())
                         .build(), new TypeReference<Map<String, Object>>() {});
 
                 Map<String,String> headers = Map.of(HttpHeaders.AUTHORIZATION, twilioConfig.getAuthToken());

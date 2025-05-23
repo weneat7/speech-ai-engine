@@ -1,6 +1,6 @@
 package com.cspl.common.gen_ai.speechaiengine.dtos.response;
 
-import com.cspl.common.gen_ai.speechaiengine.dto.EventRecordMetadata;
+import com.cspl.common.gen_ai.speechaiengine.dto.metadata.EventRecordMetadata;
 import com.cspl.common.gen_ai.speechaiengine.models.entities.EventLead;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.DialerType;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.EventStatus;
@@ -36,4 +36,5 @@ public class EventRecordResponseDto{
     EventLead eventLead;
     String agentId;
     EventRecordMetadata metaData;
+    String recordingUrl;
 }

@@ -18,11 +18,6 @@ public class TwilioController {
     private final ICallingService twilioCallingService;
     private final AppProperties.TwilioConfig twilioConfig;
 
-    @GetMapping(value = APIConstants.RECORDING)
-    public ResponseEntity<Void> recordingStatus(@RequestParam("RecordingUrl") String RecordingUrl,@RequestParam("CallSid") String CallSid, @RequestParam("RecordingStatus") String RecordingStatus){
-        twilioCallingService.handleRecording(RecordingUrl,CallSid,RecordingStatus,twilioConfig.getAuthToken());
-        return ResponseEntity.ok().build();
-    }
     @GetMapping(APIConstants.ANSWER)
     public String createWebSocketConnection(@RequestParam("CallSid") String callSid) throws JsonProcessingException {
         return twilioCallingService.configureWebSocketConnection(callSid);

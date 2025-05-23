@@ -3,15 +3,14 @@ package com.cspl.common.gen_ai.speechaiengine.services.impl;
 import com.cspl.common.gen_ai.speechaiengine.dtos.request.EventRecordRequestDto;
 import com.cspl.common.gen_ai.speechaiengine.dtos.response.EventRecordResponseDto;
 import com.cspl.common.gen_ai.speechaiengine.mappers.EventRecordMapper;
-import com.cspl.common.gen_ai.speechaiengine.models.entities.Campaign;
-import com.cspl.common.gen_ai.speechaiengine.models.entities.EventLead;
-import com.cspl.common.gen_ai.speechaiengine.models.entities.EventRecord;
-import com.cspl.common.gen_ai.speechaiengine.models.entities.EventRecordLeadMapping;
+import com.cspl.common.gen_ai.speechaiengine.models.entities.*;
+import com.cspl.common.gen_ai.speechaiengine.models.entities.enums.CallStatus;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.EventStatus;
 import com.cspl.common.gen_ai.speechaiengine.publishers.IPublisher;
 import com.cspl.common.gen_ai.speechaiengine.repositories.EventRecordLeadMappingRepository;
 import com.cspl.common.gen_ai.speechaiengine.repositories.EventRecordRepository;
 import com.cspl.common.gen_ai.speechaiengine.services.IEventRecordService;
+import com.cspl.common.gen_ai.speechaiengine.services.IFileCloudTransferService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +56,7 @@ public class EventRecordService implements IEventRecordService {
 
     private final EventRecordLeadMappingRepository eventRecordLeadMappingRepository;
 
+    private final IFileCloudTransferService fileCloudTransferService;
 
     /**
      * Create event record.
@@ -97,7 +97,15 @@ public class EventRecordService implements IEventRecordService {
     @Override
     public EventRecordResponseDto getEventRecord(String eventId, Map<String,String> requestHeaders) {
         EventRecord eventRecord = eventRecordRepository.findById(eventId).orElseThrow(()->new RuntimeException("No event record found for "+eventId));
-        return eventRecordMapper.toResponseDto(eventRecord);
+        EventRecordResponseDto eventRecordResponseDto =  eventRecordMapper.toResponseDto(eventRecord);
+
+        eventRecordResponseDto.setRecordingUrl(eventRecord.getMetaData().getCallRecordLogList().stream()
+                .filter(callRecordLog -> callRecordLog.getCallStatus().equals(CallStatus.COMPLETED))
+                .findFirst()
+                .map(callRecordLog -> fileCloudTransferService.getSignedUrl(callRecordLog.getCallSid()+".mp3",24))
+                .orElse(null));
+
+        return eventRecordResponseDto;
     }
 
     /**
@@ -242,11 +250,15 @@ public class EventRecordService implements IEventRecordService {
      * @throws Exception
      */
     @Override
-    public List<EventRecord> getAllEventLeads(String campaignId, int page, int size, String sortBy, String sortDir) throws Exception {
+    public List<EventRecord> getAllEventRecords(String campaignId, int page, int size, String sortBy, String sortDir) throws Exception {
         Pageable pageable = PageRequest.of(page, size, sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());
         List<EventRecordLeadMapping> eventRecordLeadMappings =  eventRecordLeadMappingRepository.findByCampaignId(campaignId,pageable).getContent();
         List<EventRecord> eventRecords = new ArrayList<>();
         for(EventRecordLeadMapping eventRecordLeadMapping : eventRecordLeadMappings){
+            List<CallRecordLog> callRecordLogs = eventRecordLeadMapping.getEventRecord().getMetaData().getCallRecordLogList();
+            for(CallRecordLog callRecordLog : callRecordLogs){
+                callRecordLog.setRecordingUrl(fileCloudTransferService.getSignedUrl(callRecordLog.getCallSid()+".mp3",24));
+            }
             eventRecords.add(eventRecordLeadMapping.getEventRecord());
         }
         return eventRecords;

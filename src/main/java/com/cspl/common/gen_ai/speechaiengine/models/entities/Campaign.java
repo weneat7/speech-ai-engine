@@ -1,6 +1,6 @@
 package com.cspl.common.gen_ai.speechaiengine.models.entities;
 
-import com.cspl.common.gen_ai.speechaiengine.dto.CampaignMetadata;
+import com.cspl.common.gen_ai.speechaiengine.dto.metadata.CampaignMetadata;
 import com.cspl.common.gen_ai.speechaiengine.models.enums.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

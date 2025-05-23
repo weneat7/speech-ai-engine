@@ -80,6 +80,6 @@ public interface IEventRecordService {
 
     public EventRecord createOrUpdateEventRecord(EventRecord eventRecord);
 
-    public List<EventRecord> getAllEventLeads(String campaignId, int page, int size, String sortBy, String sortDir) throws Exception;
+    public List<EventRecord> getAllEventRecords(String campaignId, int page, int size, String sortBy, String sortDir) throws Exception;
 
 }

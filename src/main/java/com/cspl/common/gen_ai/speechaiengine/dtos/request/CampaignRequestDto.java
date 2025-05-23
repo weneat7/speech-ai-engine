@@ -56,5 +56,4 @@ public class CampaignRequestDto implements Serializable {
     private List<String> ruleId;
     private Integer backOffTimeInMinutes;
     private List<String> fromPhoneNumber;
-    private AIProvider aiProvider;
 }

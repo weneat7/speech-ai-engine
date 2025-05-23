@@ -1,5 +1,6 @@
-package com.cspl.common.gen_ai.speechaiengine.dto;
+package com.cspl.common.gen_ai.speechaiengine.dto.metadata;
 
+import com.cspl.common.gen_ai.speechaiengine.config.EventRecordRetryConfiguration;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,4 +16,5 @@ public class CampaignMetadata {
    private Double totalDurationInSeconds = 0D;
    private Double avgDurationInSeconds = 0D;
    private Double pickUpRate = 0D;
+   private EventRecordRetryConfiguration eventRecordRetryConfiguration;
 }

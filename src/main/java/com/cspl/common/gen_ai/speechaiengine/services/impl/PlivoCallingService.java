@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -34,20 +35,18 @@ public class PlivoCallingService extends AbstractCallingService {
     @Override
     public void updateCallRecordStatus(String callSid, String status) throws Exception {
         CallRecordLog callRecordLog = callRecordLogRepository.findByCallSid(callSid).orElseThrow(()->new RuntimeException("No Call Record Found for callSid : "+callSid));
+        if(redisServiceManager.isKeyPresent(callSid)){
+            return;
+        }
         callRecordLog.setCallStatus(CallStatus.getFromValue(status));
         pullCallAndClearRedis(callRecordLog.getEventKey());
-        if(!callRecordLog.getCallStatus().equals(CallStatus.COMPLETED)) {
+        if (!callRecordLog.getCallStatus().equals(CallStatus.COMPLETED)) {
             callRecordLogRepository.save(callRecordLog);
-        }
-        else {
-            Map<String,Object> callDetails = restClientHelper.call(plivoConfig.getCallUri()+callSid,Map.of(HttpHeaders.AUTHORIZATION, plivoConfig.getAuthToken()));
+        } else {
+            Map<String, Object> callDetails = restClientHelper.call(plivoConfig.getCallUri() + callSid, Map.of(HttpHeaders.AUTHORIZATION, plivoConfig.getAuthToken()));
             callRecordLog.setCallDetailsDto(objectMapper.convertValue(callDetails, CallDetailsDto.class));
-            handleCallEndCompleted(callRecordLog);
-
-
-            CallRecordingLogDTO callRecordingLogDTO = callRecordLogMapper.toCallRecordingDTO(callRecordLog);
-            callRecordingLogDTO.setEncodedAuth(plivoConfig.getAuthToken());
-            rqueueMessageEnqueuer.enqueue(AppConstants.CALL_RECORDING_QUEUE,callRecordingLogDTO);
+            handleCallEndCompleted(callRecordLog, plivoConfig.getAuthToken());
+            redisServiceManager.set(callSid,status, 2, TimeUnit.MINUTES);
         }
     }
 

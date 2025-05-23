@@ -10,6 +10,7 @@ import com.cspl.common.gen_ai.speechaiengine.repositories.*;
 import com.cspl.common.gen_ai.speechaiengine.services.ICampaignService;
 import com.cspl.common.gen_ai.speechaiengine.services.IEventLeadService;
 import com.cspl.common.gen_ai.speechaiengine.services.IEventRecordService;
+import com.cspl.common.gen_ai.speechaiengine.services.IFileCloudTransferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -76,6 +77,8 @@ public class EventLeadService implements IEventLeadService {
     private final CampaignRepository campaignRepository;
 
     private final EventRecordLeadMappingRepository eventRecordLeadMappingRepository;
+
+    private final IFileCloudTransferService fileCloudTransferService;
 
     /**
      * Process csv file as string.
@@ -204,7 +207,7 @@ public class EventLeadService implements IEventLeadService {
                 eventLeadResponseDTO.setRecordingUrl(eventRecord.getMetaData().getCallRecordLogList().stream()
                         .filter(callRecordLog -> callRecordLog.getCallStatus().equals(CallStatus.COMPLETED))
                         .findFirst()
-                        .map(CallRecordLog::getRecordingUrl)
+                        .map(callRecordLog -> fileCloudTransferService.getSignedUrl(callRecordLog.getCallSid()+".mp3",24))
                         .orElse(null));
             }
             return eventLeadResponseDTO;

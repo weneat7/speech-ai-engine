@@ -29,12 +29,4 @@ public interface ICallingService {
      * @return
      */
     public String configureWebSocketConnection(String callSid) throws JsonProcessingException;
-
-    /**
-     * handle recording on call end
-     * @param recordingUrl
-     * @param callSid
-     * @param recordingStatus
-     */
-    public void handleRecording(String recordingUrl,String callSid,String recordingStatus ,String encodedAuth);
 }

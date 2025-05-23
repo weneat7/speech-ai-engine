@@ -132,7 +132,7 @@ public class EventRecordController {
                                                                  @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
                                                                  @RequestParam(value = "sortDir", required = false, defaultValue = "asc") String sortDir,
                                                                  @RequestHeader Map<String,String> headers) throws Exception {
-        return ResponseEntity.ok().body(eventRecordService.getAllEventLeads(campaignId,page,size,sortBy,sortDir));
+        return ResponseEntity.ok().body(eventRecordService.getAllEventRecords(campaignId,page,size,sortBy,sortDir));
     }
 
     @GetMapping("/process")
